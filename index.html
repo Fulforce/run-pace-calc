@@ -8,6 +8,7 @@
       content="Target Pace is a fast running pace calculator for race goals, pace conversion, and cumulative km or mile splits."
     >
     <title>Target Pace</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <script src="app.js" defer></script>
   </head>
@@ -63,7 +64,7 @@
               <div class="time-part">
                 <label for="goal-minutes">Minutes</label>
                 <div class="time-stepper">
-                  <input id="goal-minutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="20">
+                  <input id="goal-minutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="20" data-wrap="true">
                   <div class="time-step-buttons">
                     <button type="button" data-step-target="goal-minutes" data-step="-1" aria-label="Decrease minutes">-</button>
                     <button type="button" data-step-target="goal-minutes" data-step="1" aria-label="Increase minutes">+</button>
@@ -73,7 +74,7 @@
               <div class="time-part">
                 <label for="goal-seconds">Seconds</label>
                 <div class="time-stepper">
-                  <input id="goal-seconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0">
+                  <input id="goal-seconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0" data-wrap="true">
                   <div class="time-step-buttons">
                     <button type="button" data-step-target="goal-seconds" data-step="-1" aria-label="Decrease seconds">-</button>
                     <button type="button" data-step-target="goal-seconds" data-step="1" aria-label="Increase seconds">+</button>
@@ -83,16 +84,38 @@
             </div>
           </fieldset>
 
-          <label class="field pace-field is-hidden" data-field="pace">
-            <span>Pace</span>
-            <div class="inline-control">
-              <input id="pace" inputmode="numeric" autocomplete="off" placeholder="05:00" value="05:00">
-              <select id="pace-unit" aria-label="Pace unit">
-                <option value="km">/km</option>
-                <option value="mi">/mi</option>
-              </select>
+          <fieldset class="field pace-field is-hidden" data-field="pace">
+            <legend>Pace</legend>
+            <div class="pace-parts">
+              <div class="time-part">
+                <label for="pace-minutes">Minutes</label>
+                <div class="time-stepper">
+                  <input id="pace-minutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="5" data-wrap="true">
+                  <div class="time-step-buttons">
+                    <button type="button" data-step-target="pace-minutes" data-step="-1" aria-label="Decrease pace minutes">-</button>
+                    <button type="button" data-step-target="pace-minutes" data-step="1" aria-label="Increase pace minutes">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="time-part">
+                <label for="pace-seconds">Seconds</label>
+                <div class="time-stepper">
+                  <input id="pace-seconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0" data-wrap="true">
+                  <div class="time-step-buttons">
+                    <button type="button" data-step-target="pace-seconds" data-step="-1" aria-label="Decrease pace seconds">-</button>
+                    <button type="button" data-step-target="pace-seconds" data-step="1" aria-label="Increase pace seconds">+</button>
+                  </div>
+                </div>
+              </div>
+              <label class="pace-unit-field">
+                <span>Unit</span>
+                <select id="pace-unit" aria-label="Pace unit">
+                  <option value="km">/km</option>
+                  <option value="mi">/mi</option>
+                </select>
+              </label>
             </div>
-          </label>
+          </fieldset>
         </form>
 
         <p id="message" class="message" role="status" aria-live="polite"></p>

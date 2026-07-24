@@ -32,3 +32,11 @@ main branch and the repository root.
 ## Local use
 
 Go to repo root and run `python3 -m http.server 8000`
+
+Then open `http://localhost:8000`.
+
+## Project Docs
+
+- [Spec](SPEC.md)
+- [Contributing](CONTRIBUTING.md)
+- [Agent guidance](AGENTS.md)

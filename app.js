@@ -15,7 +15,8 @@ const distances = {
   goalHours: document.querySelector("#goal-hours"),
   goalMinutes: document.querySelector("#goal-minutes"),
   goalSeconds: document.querySelector("#goal-seconds"),
-  pace: document.querySelector("#pace"),
+  paceMinutes: document.querySelector("#pace-minutes"),
+  paceSeconds: document.querySelector("#pace-seconds"),
   paceUnit: document.querySelector("#pace-unit"),
   message: document.querySelector("#message"),
   finishTime: document.querySelector("#finish-time"),
@@ -30,28 +31,6 @@ let splitUnit = "km";
 let holdTimeout;
 let holdInterval;
 let ignoreNextClick = false;
-
-function parseClock(value, defaultHours = 0) {
-  const parts = value.trim().split(":");
-  if (parts.length === 0 || parts.length > 3 || parts.some((part) => part === "")) {
-    return null;
-  }
-
-  const numbers = parts.map((part) => Number(part));
-  if (numbers.some((number) => !Number.isFinite(number) || number < 0)) {
-    return null;
-  }
-
-  if (parts.length === 1) {
-    return numbers[0] * 60;
-  }
-
-  if (parts.length === 2) {
-    return defaultHours * 3600 + numbers[0] * 60 + numbers[1];
-  }
-
-  return numbers[0] * 3600 + numbers[1] * 60 + numbers[2];
-}
 
 function parseTimePart(field) {
   if (field.value.trim() === "") {
@@ -76,6 +55,17 @@ function getGoalSeconds() {
   }
 
   return hours * 3600 + minutes * 60 + seconds;
+}
+
+function getPaceSeconds() {
+  const minutes = parseTimePart(distances.paceMinutes);
+  const seconds = parseTimePart(distances.paceSeconds);
+
+  if (minutes === null || seconds === null || minutes > 59 || seconds > 59) {
+    return null;
+  }
+
+  return minutes * 60 + seconds;
 }
 
 function setGoalTime({ hours, minutes, seconds }) {
@@ -125,7 +115,7 @@ function stepTimePart(button) {
   const min = Number(field.min || 0);
   const max = Number(field.max || Number.MAX_SAFE_INTEGER);
   const value = Number(field.value || field.defaultValue || 0);
-  const shouldWrap = field.id === "goal-minutes" || field.id === "goal-seconds";
+  const shouldWrap = field.dataset.wrap === "true";
 
   if (shouldWrap && direction < 0 && value <= min) {
     field.value = max;
@@ -227,9 +217,9 @@ function getCalculation() {
   if (mode === "time") {
     finishSeconds = getGoalSeconds();
   } else {
-    const paceSeconds = parseClock(distances.pace.value);
+    const paceSeconds = getPaceSeconds();
     if (paceSeconds === null || paceSeconds <= 0) {
-      return { error: "Enter a pace as mm:ss, such as 05:00." };
+      return { error: "Enter a pace with seconds between 0 and 59." };
     }
 
     const secondsPerKm = distances.paceUnit.value === "mi" ? paceSeconds / KM_PER_MILE : paceSeconds;
@@ -300,9 +290,15 @@ document.querySelectorAll("[data-split-unit]").forEach((button) => {
   button.addEventListener("click", () => setSplitUnit(button.dataset.splitUnit));
 });
 
-const goalTimeFields = [distances.goalHours, distances.goalMinutes, distances.goalSeconds];
+const timePartFields = [
+  distances.goalHours,
+  distances.goalMinutes,
+  distances.goalSeconds,
+  distances.paceMinutes,
+  distances.paceSeconds,
+];
 
-goalTimeFields.forEach((field) => {
+timePartFields.forEach((field) => {
   field.addEventListener("wheel", scrollStepTimePart, { passive: false });
   field.addEventListener("blur", () => {
     clampField(field);
@@ -320,7 +316,7 @@ document.querySelectorAll("[data-step-target]").forEach((button) => {
   button.addEventListener("touchcancel", stopHoldStep);
 });
 
-[...goalTimeFields, distances.pace, distances.paceUnit].forEach((field) => {
+[...timePartFields, distances.paceUnit].forEach((field) => {
   field.addEventListener("input", update);
   field.addEventListener("change", update);
 });
