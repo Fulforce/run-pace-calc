@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Target Pace is a fast running pace calculator for race goals, pace conversion, and cumulative km or mile splits."
+    >
+    <title>Target Pace</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="app" aria-labelledby="app-title">
+      <section class="calculator" aria-label="Running pace calculator">
+        <header class="header">
+          <div>
+            <p class="eyebrow">Running calculator</p>
+            <h1 id="app-title">Target Pace</h1>
+          </div>
+          <p class="intro">
+            Enter a race goal or a known pace. Results update instantly.
+          </p>
+        </header>
+
+        <div class="mode-switch" role="tablist" aria-label="Calculator mode">
+          <button class="mode-button is-active" type="button" data-mode="time" role="tab" aria-selected="true">
+            Goal time
+          </button>
+          <button class="mode-button" type="button" data-mode="pace" role="tab" aria-selected="false">
+            Known pace
+          </button>
+        </div>
+
+        <form class="form" novalidate>
+          <label class="field">
+            <span>Distance</span>
+            <select id="distance">
+              <option value="5">5K</option>
+              <option value="10">10K</option>
+              <option value="21.0975">Half marathon</option>
+              <option value="42.195">Marathon</option>
+              <option value="50">50K</option>
+              <option value="100">100K</option>
+              <option value="160.9344">100 miles</option>
+            </select>
+          </label>
+
+          <fieldset class="field time-field" data-field="goal-time">
+            <legend>Goal finish time</legend>
+            <div class="time-parts">
+              <label>
+                <span>Hours</span>
+                <input id="goal-hours" type="number" inputmode="numeric" min="0" max="99" step="1" value="0">
+              </label>
+              <label>
+                <span>Minutes</span>
+                <input id="goal-minutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="20">
+              </label>
+              <label>
+                <span>Seconds</span>
+                <input id="goal-seconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0">
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="field pace-field is-hidden" data-field="pace">
+            <span>Pace</span>
+            <div class="inline-control">
+              <input id="pace" inputmode="numeric" autocomplete="off" placeholder="05:00" value="05:00">
+              <select id="pace-unit" aria-label="Pace unit">
+                <option value="km">/km</option>
+                <option value="mi">/mi</option>
+              </select>
+            </div>
+          </label>
+        </form>
+
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+
+        <section class="results" aria-label="Calculated pace results">
+          <article class="result">
+            <span>Finish time</span>
+            <strong id="finish-time">20:00</strong>
+          </article>
+          <article class="result">
+            <span>Pace per km</span>
+            <strong id="pace-km">4:00 /km</strong>
+          </article>
+          <article class="result">
+            <span>Pace per mile</span>
+            <strong id="pace-mi">6:26 /mi</strong>
+          </article>
+        </section>
+
+        <details class="splits">
+          <summary>Show splits</summary>
+          <div class="split-header" aria-label="Cumulative splits">
+            <h2>Splits</h2>
+            <div class="split-controls" role="tablist" aria-label="Split unit">
+              <button class="split-button is-active" type="button" data-split-unit="km" role="tab" aria-selected="true">
+                1 km
+              </button>
+              <button class="split-button" type="button" data-split-unit="mi" role="tab" aria-selected="false">
+                1 mi
+              </button>
+            </div>
+          </div>
+
+          <div class="split-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th id="split-distance-heading" scope="col">Kilometer</th>
+                  <th scope="col">Elapsed</th>
+                </tr>
+              </thead>
+              <tbody id="split-body"></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+    </main>
+  </body>
+</html>
