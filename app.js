@@ -29,6 +29,7 @@ let mode = "time";
 let splitUnit = "km";
 let holdTimeout;
 let holdInterval;
+let ignoreNextClick = false;
 
 function parseClock(value, defaultHours = 0) {
   const parts = value.trim().split(":");
@@ -121,7 +122,16 @@ function stepTimePart(button) {
     return;
   }
 
-  if (direction > 0) {
+  const min = Number(field.min || 0);
+  const max = Number(field.max || Number.MAX_SAFE_INTEGER);
+  const value = Number(field.value || field.defaultValue || 0);
+  const shouldWrap = field.id === "goal-minutes" || field.id === "goal-seconds";
+
+  if (shouldWrap && direction < 0 && value <= min) {
+    field.value = max;
+  } else if (shouldWrap && direction > 0 && value >= max) {
+    field.value = min;
+  } else if (direction > 0) {
     field.stepUp();
   } else {
     field.stepDown();
@@ -139,12 +149,31 @@ function stopHoldStep() {
 function startHoldStep(event) {
   const button = event.currentTarget;
 
-  stepTimePart(button);
   stopHoldStep();
 
   holdTimeout = window.setTimeout(() => {
+    ignoreNextClick = true;
+    stepTimePart(button);
     holdInterval = window.setInterval(() => stepTimePart(button), 80);
   }, 350);
+}
+
+function startTouchStep(event) {
+  event.preventDefault();
+  ignoreNextClick = true;
+  stepTimePart(event.currentTarget);
+  startHoldStep(event);
+}
+
+function tapStep(event) {
+  if (ignoreNextClick) {
+    ignoreNextClick = false;
+    return;
+  }
+
+  event.preventDefault();
+  stopHoldStep();
+  stepTimePart(event.currentTarget);
 }
 
 function formatDuration(totalSeconds) {
@@ -282,10 +311,13 @@ goalTimeFields.forEach((field) => {
 });
 
 document.querySelectorAll("[data-step-target]").forEach((button) => {
-  button.addEventListener("pointerdown", startHoldStep);
-  button.addEventListener("pointerup", stopHoldStep);
-  button.addEventListener("pointercancel", stopHoldStep);
-  button.addEventListener("pointerleave", stopHoldStep);
+  button.addEventListener("click", tapStep);
+  button.addEventListener("mousedown", startHoldStep);
+  button.addEventListener("mouseup", stopHoldStep);
+  button.addEventListener("mouseleave", stopHoldStep);
+  button.addEventListener("touchstart", startTouchStep, { passive: false });
+  button.addEventListener("touchend", stopHoldStep);
+  button.addEventListener("touchcancel", stopHoldStep);
 });
 
 [...goalTimeFields, distances.pace, distances.paceUnit].forEach((field) => {

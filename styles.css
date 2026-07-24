@@ -153,6 +153,7 @@ h2 {
 }
 
 .field span,
+.time-part label,
 legend {
   color: var(--muted);
   font-size: 0.9rem;
@@ -213,12 +214,12 @@ button:focus-visible {
   gap: 8px;
 }
 
-.time-parts label {
+.time-part {
   display: grid;
   gap: 6px;
 }
 
-.time-parts span {
+.time-part label {
   font-size: 0.78rem;
 }
 
@@ -230,12 +231,17 @@ button:focus-visible {
 
 .time-stepper {
   display: grid;
-  grid-template-columns: 36px minmax(44px, 1fr) 36px;
-  gap: 4px;
+  gap: 6px;
+}
+
+.time-step-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .time-stepper button {
-  min-height: 52px;
+  min-height: 42px;
   color: var(--accent-strong);
   background: var(--accent-soft);
   border: 1px solid var(--line);

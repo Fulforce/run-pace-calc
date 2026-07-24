@@ -50,30 +50,36 @@
           <fieldset class="field time-field" data-field="goal-time">
             <legend>Goal finish time</legend>
             <div class="time-parts">
-              <label>
-                <span>Hours</span>
+              <div class="time-part">
+                <label for="goal-hours">Hours</label>
                 <div class="time-stepper">
-                  <button type="button" data-step-target="goal-hours" data-step="-1" aria-label="Decrease hours">-</button>
                   <input id="goal-hours" type="number" inputmode="numeric" min="0" max="99" step="1" value="0">
-                  <button type="button" data-step-target="goal-hours" data-step="1" aria-label="Increase hours">+</button>
+                  <div class="time-step-buttons">
+                    <button type="button" data-step-target="goal-hours" data-step="-1" aria-label="Decrease hours">-</button>
+                    <button type="button" data-step-target="goal-hours" data-step="1" aria-label="Increase hours">+</button>
+                  </div>
                 </div>
-              </label>
-              <label>
-                <span>Minutes</span>
+              </div>
+              <div class="time-part">
+                <label for="goal-minutes">Minutes</label>
                 <div class="time-stepper">
-                  <button type="button" data-step-target="goal-minutes" data-step="-1" aria-label="Decrease minutes">-</button>
                   <input id="goal-minutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="20">
-                  <button type="button" data-step-target="goal-minutes" data-step="1" aria-label="Increase minutes">+</button>
+                  <div class="time-step-buttons">
+                    <button type="button" data-step-target="goal-minutes" data-step="-1" aria-label="Decrease minutes">-</button>
+                    <button type="button" data-step-target="goal-minutes" data-step="1" aria-label="Increase minutes">+</button>
+                  </div>
                 </div>
-              </label>
-              <label>
-                <span>Seconds</span>
+              </div>
+              <div class="time-part">
+                <label for="goal-seconds">Seconds</label>
                 <div class="time-stepper">
-                  <button type="button" data-step-target="goal-seconds" data-step="-1" aria-label="Decrease seconds">-</button>
                   <input id="goal-seconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0">
-                  <button type="button" data-step-target="goal-seconds" data-step="1" aria-label="Increase seconds">+</button>
+                  <div class="time-step-buttons">
+                    <button type="button" data-step-target="goal-seconds" data-step="-1" aria-label="Decrease seconds">-</button>
+                    <button type="button" data-step-target="goal-seconds" data-step="1" aria-label="Increase seconds">+</button>
+                  </div>
                 </div>
-              </label>
+              </div>
             </div>
           </fieldset>
 
