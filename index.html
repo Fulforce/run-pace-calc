@@ -52,15 +52,27 @@
             <div class="time-parts">
               <label>
                 <span>Hours</span>
-                <input id="goal-hours" type="number" inputmode="numeric" min="0" max="99" step="1" value="0">
+                <div class="time-stepper">
+                  <button type="button" data-step-target="goal-hours" data-step="-1" aria-label="Decrease hours">-</button>
+                  <input id="goal-hours" type="number" inputmode="numeric" min="0" max="99" step="1" value="0">
+                  <button type="button" data-step-target="goal-hours" data-step="1" aria-label="Increase hours">+</button>
+                </div>
               </label>
               <label>
                 <span>Minutes</span>
-                <input id="goal-minutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="20">
+                <div class="time-stepper">
+                  <button type="button" data-step-target="goal-minutes" data-step="-1" aria-label="Decrease minutes">-</button>
+                  <input id="goal-minutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="20">
+                  <button type="button" data-step-target="goal-minutes" data-step="1" aria-label="Increase minutes">+</button>
+                </div>
               </label>
               <label>
                 <span>Seconds</span>
-                <input id="goal-seconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0">
+                <div class="time-stepper">
+                  <button type="button" data-step-target="goal-seconds" data-step="-1" aria-label="Decrease seconds">-</button>
+                  <input id="goal-seconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0">
+                  <button type="button" data-step-target="goal-seconds" data-step="1" aria-label="Increase seconds">+</button>
+                </div>
               </label>
             </div>
           </fieldset>
@@ -121,6 +133,15 @@
           </div>
         </details>
       </section>
+
+      <footer class="footer">
+        <p>
+          Open-source and ad-free by
+          <a href="https://github.com/Fulforce">Fulforce</a>.
+          View the project on
+          <a href="https://github.com/Fulforce/run-pace-calc">GitHub</a>.
+        </p>
+      </footer>
     </main>
   </body>
 </html>

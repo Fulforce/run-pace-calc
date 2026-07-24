@@ -51,6 +51,24 @@ select {
   box-shadow: var(--shadow);
 }
 
+.footer {
+  padding: 18px 2px 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.footer p {
+  margin-bottom: 0;
+}
+
+.footer a {
+  color: var(--accent-strong);
+  font-weight: 720;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
 .header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
@@ -185,6 +203,10 @@ button:focus-visible {
   gap: 8px;
 }
 
+.time-field {
+  grid-column: span 2;
+}
+
 .time-parts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -201,8 +223,33 @@ button:focus-visible {
 }
 
 .time-parts input {
-  padding: 0 10px;
+  min-width: 0;
+  padding: 0 4px;
   text-align: center;
+}
+
+.time-stepper {
+  display: grid;
+  grid-template-columns: 36px minmax(44px, 1fr) 36px;
+  gap: 4px;
+}
+
+.time-stepper button {
+  min-height: 52px;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 820;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.time-stepper button:active {
+  color: var(--surface);
+  background: var(--accent);
 }
 
 .is-hidden {
@@ -326,6 +373,10 @@ tr:last-child td {
   .form,
   .results {
     grid-template-columns: 1fr;
+  }
+
+  .time-field {
+    grid-column: auto;
   }
 
   .mode-switch {

@@ -27,6 +27,8 @@ const distances = {
 
 let mode = "time";
 let splitUnit = "km";
+let holdTimeout;
+let holdInterval;
 
 function parseClock(value, defaultHours = 0) {
   const parts = value.trim().split(":");
@@ -95,6 +97,54 @@ function scrollStepTimePart(event) {
   }
 
   update();
+}
+
+function clampField(field) {
+  const min = Number(field.min || 0);
+  const max = Number(field.max || Number.MAX_SAFE_INTEGER);
+  const fallback = Number(field.defaultValue || 0);
+  const value = Number(field.value);
+
+  if (!Number.isFinite(value)) {
+    field.value = fallback;
+    return;
+  }
+
+  field.value = Math.min(max, Math.max(min, value));
+}
+
+function stepTimePart(button) {
+  const field = document.querySelector(`#${button.dataset.stepTarget}`);
+  const direction = Number(button.dataset.step);
+
+  if (!field || !Number.isFinite(direction)) {
+    return;
+  }
+
+  if (direction > 0) {
+    field.stepUp();
+  } else {
+    field.stepDown();
+  }
+
+  clampField(field);
+  update();
+}
+
+function stopHoldStep() {
+  window.clearTimeout(holdTimeout);
+  window.clearInterval(holdInterval);
+}
+
+function startHoldStep(event) {
+  const button = event.currentTarget;
+
+  stepTimePart(button);
+  stopHoldStep();
+
+  holdTimeout = window.setTimeout(() => {
+    holdInterval = window.setInterval(() => stepTimePart(button), 80);
+  }, 350);
 }
 
 function formatDuration(totalSeconds) {
@@ -225,6 +275,17 @@ const goalTimeFields = [distances.goalHours, distances.goalMinutes, distances.go
 
 goalTimeFields.forEach((field) => {
   field.addEventListener("wheel", scrollStepTimePart, { passive: false });
+  field.addEventListener("blur", () => {
+    clampField(field);
+    update();
+  });
+});
+
+document.querySelectorAll("[data-step-target]").forEach((button) => {
+  button.addEventListener("pointerdown", startHoldStep);
+  button.addEventListener("pointerup", stopHoldStep);
+  button.addEventListener("pointercancel", stopHoldStep);
+  button.addEventListener("pointerleave", stopHoldStep);
 });
 
 [...goalTimeFields, distances.pace, distances.paceUnit].forEach((field) => {
