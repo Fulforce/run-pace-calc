@@ -208,7 +208,12 @@ button:focus-visible {
   grid-column: span 2;
 }
 
-.time-parts {
+.pace-field {
+  grid-column: span 2;
+}
+
+.time-parts,
+.pace-parts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
@@ -223,10 +228,20 @@ button:focus-visible {
   font-size: 0.78rem;
 }
 
-.time-parts input {
+.time-parts input,
+.pace-parts input {
   min-width: 0;
   padding: 0 4px;
   text-align: center;
+}
+
+.pace-unit-field {
+  display: grid;
+  gap: 6px;
+}
+
+.pace-unit-field span {
+  font-size: 0.78rem;
 }
 
 .time-stepper {
@@ -381,7 +396,8 @@ tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  .time-field {
+  .time-field,
+  .pace-field {
     grid-column: auto;
   }
 
