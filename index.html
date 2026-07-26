@@ -8,11 +8,11 @@
       content="Target Pace is a fast running pace calculator for race goals, pace conversion, and cumulative km or mile splits."
     >
     <title>Target Pace</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <meta name="apple-mobile-web-app-title" content="Target Pace">
-    <link rel="stylesheet" href="styles.css">
-    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="styles.css?v=2">
+    <script src="app.js?v=2" defer></script>
   </head>
   <body>
     <main class="app" aria-labelledby="app-title">
@@ -23,7 +23,7 @@
             <h1 id="app-title">Target Pace</h1>
           </div>
           <p class="intro">
-            Enter a race goal or a known pace. Results update instantly.
+            Enter a race goal, known pace, or distance. Results update instantly.
           </p>
         </header>
 
@@ -34,10 +34,13 @@
           <button class="mode-button" type="button" data-mode="pace" role="tab" aria-selected="false">
             Known pace
           </button>
+          <button class="mode-button" type="button" data-mode="distance" role="tab" aria-selected="false">
+            Convert distance
+          </button>
         </div>
 
         <form class="form" novalidate>
-          <label class="field">
+          <label class="field" data-field="race-distance">
             <span>Distance</span>
             <select id="distance">
               <option value="5">5K</option>
@@ -47,6 +50,7 @@
               <option value="50">50K</option>
               <option value="100">100K</option>
               <option value="160.9344">100 miles</option>
+              <option value="custom">Custom</option>
             </select>
           </label>
 
@@ -118,11 +122,50 @@
               </label>
             </div>
           </fieldset>
+
+          <fieldset class="field converter-field is-hidden" data-field="distance-converter">
+            <legend id="converter-legend">Distance converter</legend>
+            <div class="converter-parts">
+              <label class="converter-part converter-preset">
+                <span>Preset</span>
+                <select id="converter-preset" aria-label="Preset distance">
+                  <option value="">Custom</option>
+                  <option value="5">5K</option>
+                  <option value="10">10K</option>
+                  <option value="21.0975">Half marathon</option>
+                  <option value="42.195">Marathon</option>
+                  <option value="50">50K</option>
+                  <option value="100">100K</option>
+                  <option value="160.9344">100 miles</option>
+                </select>
+              </label>
+              <label class="converter-part">
+                <span>Kilometers</span>
+                <div class="distance-stepper">
+                  <input id="converter-km" type="text" inputmode="decimal" autocomplete="off" value="5">
+                  <div class="time-step-buttons">
+                    <button type="button" data-distance-step-target="converter-km" data-distance-step="-0.1" aria-label="Decrease kilometers">-</button>
+                    <button type="button" data-distance-step-target="converter-km" data-distance-step="0.1" aria-label="Increase kilometers">+</button>
+                  </div>
+                </div>
+              </label>
+              <label class="converter-part">
+                <span>Miles</span>
+                <div class="distance-stepper">
+                  <input id="converter-mi" type="text" inputmode="decimal" autocomplete="off" value="3.1069">
+                  <div class="time-step-buttons">
+                    <button type="button" data-distance-step-target="converter-mi" data-distance-step="-0.1" aria-label="Decrease miles">-</button>
+                    <button type="button" data-distance-step-target="converter-mi" data-distance-step="0.1" aria-label="Increase miles">+</button>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </fieldset>
         </form>
 
         <p id="message" class="message" role="status" aria-live="polite"></p>
 
-        <section class="results" aria-label="Calculated pace results">
+        <section class="results" data-section="pace-results" aria-label="Calculated pace results">
           <article class="result">
             <span>Finish time</span>
             <strong id="finish-time">20:00</strong>
@@ -137,7 +180,7 @@
           </article>
         </section>
 
-        <details class="splits">
+        <details class="splits" data-section="splits">
           <summary>Show splits</summary>
           <div class="split-header" aria-label="Cumulative splits">
             <h2>Splits</h2>

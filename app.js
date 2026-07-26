@@ -1,13 +1,13 @@
 const KM_PER_MILE = 1.609344;
 
-const defaultGoalTimes = {
-  5: { hours: 0, minutes: 20, seconds: 0 },
-  10: { hours: 0, minutes: 40, seconds: 0 },
-  21.0975: { hours: 1, minutes: 30, seconds: 0 },
-  42.195: { hours: 3, minutes: 0, seconds: 0 },
-  50: { hours: 4, minutes: 30, seconds: 0 },
-  100: { hours: 12, minutes: 0, seconds: 0 },
-  160.9344: { hours: 24, minutes: 0, seconds: 0 },
+const distancePresets = {
+  5: { label: "5K", defaultGoalTime: { hours: 0, minutes: 20, seconds: 0 } },
+  10: { label: "10K", defaultGoalTime: { hours: 0, minutes: 40, seconds: 0 } },
+  21.0975: { label: "Half marathon", defaultGoalTime: { hours: 1, minutes: 30, seconds: 0 } },
+  42.195: { label: "Marathon", defaultGoalTime: { hours: 3, minutes: 0, seconds: 0 } },
+  50: { label: "50K", defaultGoalTime: { hours: 4, minutes: 30, seconds: 0 } },
+  100: { label: "100K", defaultGoalTime: { hours: 12, minutes: 0, seconds: 0 } },
+  160.9344: { label: "100 miles", defaultGoalTime: { hours: 24, minutes: 0, seconds: 0 } },
 };
 
 const distances = {
@@ -18,12 +18,20 @@ const distances = {
   paceMinutes: document.querySelector("#pace-minutes"),
   paceSeconds: document.querySelector("#pace-seconds"),
   paceUnit: document.querySelector("#pace-unit"),
+  converterPreset: document.querySelector("#converter-preset"),
+  converterKm: document.querySelector("#converter-km"),
+  converterMi: document.querySelector("#converter-mi"),
   message: document.querySelector("#message"),
   finishTime: document.querySelector("#finish-time"),
   paceKm: document.querySelector("#pace-km"),
   paceMi: document.querySelector("#pace-mi"),
   splitBody: document.querySelector("#split-body"),
   splitDistanceHeading: document.querySelector("#split-distance-heading"),
+  paceResults: document.querySelector("[data-section='pace-results']"),
+  splitsPanel: document.querySelector("[data-section='splits']"),
+  converterLegend: document.querySelector("#converter-legend"),
+  converterPanel: document.querySelector("[data-field='distance-converter']"),
+  converterPresetField: document.querySelector(".converter-preset"),
 };
 
 let mode = "time";
@@ -31,6 +39,10 @@ let splitUnit = "km";
 let holdTimeout;
 let holdInterval;
 let ignoreNextClick = false;
+let isSyncingDistance = false;
+let distanceHoldTimeout;
+let distanceHoldInterval;
+let ignoreNextDistanceClick = false;
 
 function parseTimePart(field) {
   if (field.value.trim() === "") {
@@ -72,6 +84,14 @@ function setGoalTime({ hours, minutes, seconds }) {
   distances.goalHours.value = hours;
   distances.goalMinutes.value = minutes;
   distances.goalSeconds.value = seconds;
+}
+
+function getSelectedDistanceKm() {
+  if (distances.distance.value === "custom") {
+    return parseDistance(distances.converterKm.value);
+  }
+
+  return Number(distances.distance.value);
 }
 
 function scrollStepTimePart(event) {
@@ -183,8 +203,37 @@ function formatPace(secondsPerUnit, unit) {
   return `${formatDuration(secondsPerUnit)} /${unit}`;
 }
 
+function parseDistance(value) {
+  const trimmed = value.trim().toLowerCase();
+
+  if (trimmed === "") {
+    return null;
+  }
+
+  const match = trimmed.match(/^(\d+(?:\.\d+)?|\.\d+)\s*(?:k|km|kms|kilometer|kilometers|m|mi|mile|miles)?$/);
+  if (!match) {
+    return null;
+  }
+
+  const number = Number(match[1]);
+  if (!Number.isFinite(number) || number < 0) {
+    return null;
+  }
+
+  return number;
+}
+
+function formatDistance(value) {
+  return Number(value.toFixed(4)).toString();
+}
+
 function setMode(nextMode) {
   mode = nextMode;
+
+  if (mode === "distance" && distances.distance.value !== "custom") {
+    distances.converterPreset.value = distances.distance.value;
+    setConverterDistanceKm(Number(distances.distance.value));
+  }
 
   document.querySelectorAll("[data-mode]").forEach((button) => {
     const isActive = button.dataset.mode === mode;
@@ -192,8 +241,17 @@ function setMode(nextMode) {
     button.setAttribute("aria-selected", String(isActive));
   });
 
+  const showCustomDistance = mode === "distance" || distances.distance.value === "custom";
+
+  document.querySelector("[data-field='race-distance']").classList.toggle("is-hidden", mode === "distance");
   document.querySelector("[data-field='goal-time']").classList.toggle("is-hidden", mode !== "time");
   document.querySelector("[data-field='pace']").classList.toggle("is-hidden", mode !== "pace");
+  distances.converterPanel.classList.toggle("is-hidden", !showCustomDistance);
+  distances.converterPanel.classList.toggle("is-custom-distance", mode !== "distance");
+  distances.converterPresetField.classList.toggle("is-hidden", mode !== "distance");
+  distances.converterLegend.textContent = mode === "distance" ? "Distance converter" : "Custom distance";
+  distances.paceResults.classList.toggle("is-hidden", mode === "distance");
+  distances.splitsPanel.classList.toggle("is-hidden", mode === "distance");
 
   update();
 }
@@ -211,8 +269,12 @@ function setSplitUnit(nextUnit) {
 }
 
 function getCalculation() {
-  const distanceKm = Number(distances.distance.value);
+  const distanceKm = getSelectedDistanceKm();
   let finishSeconds;
+
+  if (distanceKm === null || distanceKm <= 0) {
+    return { error: "Enter a positive race distance." };
+  }
 
   if (mode === "time") {
     finishSeconds = getGoalSeconds();
@@ -264,6 +326,11 @@ function renderSplits(calculation) {
 }
 
 function update() {
+  if (mode === "distance") {
+    distances.message.textContent = "";
+    return;
+  }
+
   const calculation = getCalculation();
 
   if (calculation.error) {
@@ -280,6 +347,106 @@ function update() {
   distances.paceKm.textContent = formatPace(calculation.secondsPerKm, "km");
   distances.paceMi.textContent = formatPace(calculation.secondsPerMile, "mi");
   renderSplits(calculation);
+}
+
+function syncDistanceConverter(source) {
+  if (isSyncingDistance) {
+    return;
+  }
+
+  const sourceField = source === "km" ? distances.converterKm : distances.converterMi;
+  const targetField = source === "km" ? distances.converterMi : distances.converterKm;
+  const value = parseDistance(sourceField.value);
+
+  isSyncingDistance = true;
+  distances.converterPreset.value = "";
+  distances.distance.value = "custom";
+
+  if (value === null) {
+    targetField.value = "";
+    distances.message.textContent = sourceField.value.trim() === "" ? "" : "Enter a positive distance.";
+    isSyncingDistance = false;
+    if (mode !== "distance") {
+      update();
+    }
+    return;
+  }
+
+  targetField.value = formatDistance(source === "km" ? value / KM_PER_MILE : value * KM_PER_MILE);
+  distances.message.textContent = "";
+  isSyncingDistance = false;
+  if (mode !== "distance") {
+    update();
+  }
+}
+
+function setConverterDistanceKm(distanceKm) {
+  distances.converterKm.value = formatDistance(distanceKm);
+  distances.converterMi.value = formatDistance(distanceKm / KM_PER_MILE);
+  distances.message.textContent = "";
+}
+
+function selectPresetDistance(distanceKm) {
+  const presetKey = String(distanceKm);
+
+  distances.distance.value = presetKey;
+  distances.converterPreset.value = presetKey;
+  setConverterDistanceKm(distanceKm);
+
+  if (mode === "time") {
+    setGoalTime(distancePresets[presetKey].defaultGoalTime);
+  }
+
+  setMode(mode);
+}
+
+function stepDistance(button) {
+  const field = document.querySelector(`#${button.dataset.distanceStepTarget}`);
+  const step = Number(button.dataset.distanceStep);
+
+  if (!field || !Number.isFinite(step)) {
+    return;
+  }
+
+  const current = parseDistance(field.value) ?? 0;
+  const next = Math.max(0, current + step);
+  field.value = formatDistance(next);
+  syncDistanceConverter(field.id === "converter-km" ? "km" : "mi");
+}
+
+function stopDistanceHoldStep() {
+  window.clearTimeout(distanceHoldTimeout);
+  window.clearInterval(distanceHoldInterval);
+}
+
+function startDistanceHoldStep(event) {
+  const button = event.currentTarget;
+
+  stopDistanceHoldStep();
+
+  distanceHoldTimeout = window.setTimeout(() => {
+    ignoreNextDistanceClick = true;
+    stepDistance(button);
+    distanceHoldInterval = window.setInterval(() => stepDistance(button), 80);
+  }, 350);
+}
+
+function startDistanceTouchStep(event) {
+  event.preventDefault();
+  ignoreNextDistanceClick = true;
+  stepDistance(event.currentTarget);
+  startDistanceHoldStep(event);
+}
+
+function tapDistanceStep(event) {
+  if (ignoreNextDistanceClick) {
+    ignoreNextDistanceClick = false;
+    return;
+  }
+
+  event.preventDefault();
+  stopDistanceHoldStep();
+  stepDistance(event.currentTarget);
 }
 
 document.querySelectorAll("[data-mode]").forEach((button) => {
@@ -316,17 +483,41 @@ document.querySelectorAll("[data-step-target]").forEach((button) => {
   button.addEventListener("touchcancel", stopHoldStep);
 });
 
+document.querySelectorAll("[data-distance-step-target]").forEach((button) => {
+  button.addEventListener("click", tapDistanceStep);
+  button.addEventListener("mousedown", startDistanceHoldStep);
+  button.addEventListener("mouseup", stopDistanceHoldStep);
+  button.addEventListener("mouseleave", stopDistanceHoldStep);
+  button.addEventListener("touchstart", startDistanceTouchStep, { passive: false });
+  button.addEventListener("touchend", stopDistanceHoldStep);
+  button.addEventListener("touchcancel", stopDistanceHoldStep);
+});
+
 [...timePartFields, distances.paceUnit].forEach((field) => {
   field.addEventListener("input", update);
   field.addEventListener("change", update);
 });
 
-distances.distance.addEventListener("change", () => {
-  if (mode === "time") {
-    setGoalTime(defaultGoalTimes[distances.distance.value]);
+distances.converterKm.addEventListener("input", () => syncDistanceConverter("km"));
+distances.converterMi.addEventListener("input", () => syncDistanceConverter("mi"));
+distances.converterPreset.addEventListener("change", () => {
+  if (distances.converterPreset.value === "") {
+    distances.distance.value = "custom";
+    setMode(mode);
+    return;
   }
 
-  update();
+  selectPresetDistance(Number(distances.converterPreset.value));
+});
+
+distances.distance.addEventListener("change", () => {
+  if (distances.distance.value === "custom") {
+    distances.converterPreset.value = "";
+    setMode(mode);
+    return;
+  }
+
+  selectPresetDistance(Number(distances.distance.value));
 });
 
 update();

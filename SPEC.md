@@ -8,6 +8,7 @@ The website helps runners quickly answer either of these questions:
 
 - What pace do I need to run for a target race finish time?
 - What finish time will I run if I hold a known pace?
+- What is a distance in kilometers or miles?
 
 The experience should feel immediate. Changing any input should update the
 results without a calculate button.
@@ -24,6 +25,8 @@ results without a calculate button.
 
 ## Supported Distances
 
+Preset distances:
+
 - 5K
 - 10K
 - Half marathon
@@ -32,13 +35,15 @@ results without a calculate button.
 - 100K
 - 100 miles
 
+Custom distances are supported through shared kilometer and mile fields.
+
 ## Modes
 
 ### Goal Time
 
 Inputs:
 
-- distance
+- preset or custom distance
 - hours
 - minutes
 - seconds
@@ -54,7 +59,7 @@ Outputs:
 
 Inputs:
 
-- distance
+- preset or custom distance
 - pace minutes
 - pace seconds
 - pace unit: per km or per mile
@@ -65,6 +70,22 @@ Outputs:
 - pace per km
 - pace per mile
 - optional cumulative splits
+
+### Distance Converter
+
+Inputs:
+
+- preset distance
+- kilometers
+- miles
+
+Behavior:
+
+- choosing a preset updates kilometers and miles immediately
+- editing kilometers updates miles immediately
+- editing miles updates kilometers immediately
+- custom distances carry across to the pace calculator
+- no pace cards or split table are shown in this mode
 
 ## Split Behavior
 
