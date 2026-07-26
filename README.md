@@ -3,13 +3,15 @@
 A simple, fast, ad-free running pace converter and calculator for race goals.
 
 Target Pace is a static website that runs entirely in the browser. Enter either a
-goal finish time or a known pace, choose a race distance, and the page updates
+goal finish time, known pace, or distance conversion, and the page updates
 instantly with:
 
 - finish time
 - pace per km
 - pace per mile
 - cumulative 1 km or 1 mile splits
+- km to mile conversion
+- mile to km conversion
 
 Supported preset distances:
 
@@ -20,6 +22,9 @@ Supported preset distances:
 - 50K
 - 100K
 - 100 miles
+
+Custom distances are also supported. Enter a value in kilometers or miles and it
+will be shared across the pace calculator and distance converter.
 
 ## Hosting
 
